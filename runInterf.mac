@@ -1,0 +1,51 @@
+# $Id: run1.mac,v 1.2 2000-11-21 10:59:42 maire Exp $
+#
+# Macro file for "exampleN03.cc"
+# 
+# can be run in batch, without graphic
+# or interactively: Idle> /control/execute run1.mac
+#
+#/control/verbose 2
+#/control/saveHistory
+#
+#/run/verbose 2
+#/event/verbose 0
+#/tracking/verbose 1
+# 
+# muon 300 MeV to the direction (1.,0.,0.)
+# 3 events
+#
+
+/N03/gun/rndm on
+/N03/det/setAbsMat G4_PLEXIGLASS
+#G4_PLEXIGLASS
+#Water
+/N03/det/setGapMat Air
+/N03/det/setAbsThick 2. cm
+/N03/det/setGapThick 2. cm
+/N03/det/setNbOfLayers 10
+/N03/det/setSizeYZ   20 cm
+##########No update here->initialize after!!! for optimization
+##########reading conversion <=> ABS thick=GapThick!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#/N03/det/update
+##################################################################
+/run/initialize
+# Visualize with OPENGL
+/control/execute visInterf.mac
+/xfield/isSpectrum? yes
+#
+#######The following SPECTRUM data require NO UNITS!!
+#--------------Set XRay voltage
+/xfield/kVp 80.0
+#--------------Set Xray tube filtration in mmAl:
+/xfield/filtration 2.5
+#--------------Set XRay tube anode material: W for tungsten; MO for molibden and RH for rhuteniu.
+/xfield/anodMaterial W
+#--------------Set XRay tube anode angle in degrees
+/xfield/anodAngle 17
+#--------------Set waveform ripple in %. Tubs: constant potential=>0; 3phase6P=>~10 or 15; 3phase12P=>~5
+/xfield/ripple 0
+############################
+/gun/particle gamma
+/gun/energy 0.662 MeV
+/run/beamOn 100
