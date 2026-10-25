@@ -41,6 +41,11 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::RunAction()
+	//some initialization to be able to delete!
+	:enV_array(0),
+	  ws_array(0),
+	  ibin_array(0),
+	  xraybuilder(0)
 {
 	// add new units for dose 
   const G4double milligray = 1.e-3*gray;
@@ -76,6 +81,12 @@ RunAction::~RunAction()
 
 	delete [] ddAbsArray2;//// When done, free memory pointed to by kAbsArray.
 	delete [] ddGapArray2;
+
+	//also other pointers
+	delete[] enV_array;
+    delete[] ws_array;
+    delete[] ibin_array;
+	delete xraybuilder;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -120,6 +131,11 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   }
 
   if(PrimaryGeneratorAction::IsSpectrum()){
+	  delete xraybuilder;
+	  xraybuilder = nullptr;
+	  delete[] enV_array;
+	  enV_array = nullptr;
+
 	xraybuilder = new XRayBuilder(
 	PrimaryGeneratorAction::kv,//80.0
 	PrimaryGeneratorAction::filtration,//2.5
@@ -134,6 +150,8 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 	photonsPerDAP=xraybuilder->Get_photons_per_mm2_per_uGy();
 	kermaPer_mas_at75cm=xraybuilder->GetAirKerma_per_mAs_at75cm();
 	prepareAliasSampling(ndata,prob);
+	// Ii dam delete[] AICI pentru a elimina leak-ul, farA a atinge restul structurii!
+	delete[] prob; 
   }
 }
 
@@ -457,7 +475,7 @@ void RunAction::prepareAliasSampling(int nsbin, std::vector<double> fs_array){
 			exit2b = false;
 			for (j_h = 1; j_h <= nsbin; j_h++) {
 				if (ws_array[j_h - 1] < 0) {
-					if (abs(ws_array[j_h - 1]) > sum) {
+					if (std::abs(ws_array[j_h - 1]) > sum) {
 						// GOTO :AT_EXIT1:;
 						exit1b = true;
 						break;
@@ -470,7 +488,7 @@ void RunAction::prepareAliasSampling(int nsbin, std::vector<double> fs_array){
 
 			for (j_l = 1; j_l <= nsbin; j_l++) {
 				if (ws_array[j_l - 1] < 0) {
-					if (abs(ws_array[j_l - 1]) < sum) {
+					if (std::abs(ws_array[j_l - 1]) < sum) {
 						// GOTO :AT_EXIT2:;
 						exit2b = true;
 						break;
@@ -481,7 +499,7 @@ void RunAction::prepareAliasSampling(int nsbin, std::vector<double> fs_array){
 				j_l = nsbin;
 			// :AT_EXIT2:
 
-			aux = sum - abs(ws_array[j_l - 1]);
+			aux = sum - std::abs(ws_array[j_l - 1]);
 			ws_array[j_h - 1] = ws_array[j_h - 1] + aux;
 			ws_array[j_l - 1] = -ws_array[j_l - 1] / sum;
 			ibin_array[j_l - 1] = j_h;
@@ -541,7 +559,7 @@ void RunAction::prepareAliasSampling(int nsbin, double* fs_array){
 			exit2b = false;
 			for (j_h = 1; j_h <= nsbin; j_h++) {
 				if (ws_array[j_h - 1] < 0) {
-					if (abs(ws_array[j_h - 1]) > sum) {
+					if (std::abs(ws_array[j_h - 1]) > sum) {
 						// GOTO :AT_EXIT1:;
 						exit1b = true;
 						break;
@@ -554,7 +572,7 @@ void RunAction::prepareAliasSampling(int nsbin, double* fs_array){
 
 			for (j_l = 1; j_l <= nsbin; j_l++) {
 				if (ws_array[j_l - 1] < 0) {
-					if (abs(ws_array[j_l - 1]) < sum) {
+					if (std::abs(ws_array[j_l - 1]) < sum) {
 						// GOTO :AT_EXIT2:;
 						exit2b = true;
 						break;
@@ -565,7 +583,7 @@ void RunAction::prepareAliasSampling(int nsbin, double* fs_array){
 				j_l = nsbin;
 			// :AT_EXIT2:
 
-			aux = sum - abs(ws_array[j_l - 1]);
+			aux = sum - std::abs(ws_array[j_l - 1]);
 			ws_array[j_h - 1] = ws_array[j_h - 1] + aux;
 			ws_array[j_l - 1] = -ws_array[j_l - 1] / sum;
 			ibin_array[j_l - 1] = j_h;
